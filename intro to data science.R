@@ -15,7 +15,24 @@ install.packages("ggcorrplot")
 
 install.packages("kableExtra")
 
-install.packages("knitr")
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(caret)
+library(officer)
+library(flextable)
+library(knitr)
+library(kableExtra)
+library(ggcorrplot)
+library(viridisLite)
+library(scales)
+library(MASS)
+library(DescTools)
+library(pROC)
+library(car)
+library(randomForest)
+library(patchwork)
+library(broom)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -733,10 +750,16 @@ abline(a = 1, b = -1, lty = 2, col = "grey70")
 
 #plotting confusion matrix for visual reference: logistic regression 2 (best performing lgr model)
 
+cm_lgr_df <- as.data.frame(logistic_regression_confusion_matrix_results_2$table)
+
+colnames(cm_lgr_df) <- c("Predicted", "Actual", "Freq")
+
 cf_lgr_comparison <- ggplot(cm_lgr_df, aes(x = Predicted, y = Actual, fill = Freq)) +
   geom_tile(color = "white", lwd = 1) +
-  geom_text(aes(label = Freq), size = 6, fontface = "bold", 
-            color = ifelse(cm_lgr_df$Freq > max(cm_lgr_df$Freq)/2, "white", "black")) +
+  geom_text(aes(label = Freq), 
+            size = 6, 
+            fontface = "bold", 
+            color = ifelse(cm_lgr_df$Predicted == "1", "white", "black")) +
   scale_fill_viridis_c(option = "viridis", direction = 1) + 
   labs(
     title = "Confusion Matrix: Logistic Regression 2",
@@ -747,20 +770,14 @@ cf_lgr_comparison <- ggplot(cm_lgr_df, aes(x = Predicted, y = Actual, fill = Fre
   theme_minimal() +
   theme(
     panel.grid.major = element_blank(), 
-    axis.text = element_text(size = 12)
+    axis.text = element_text(size = 12, face = "bold"),
+    plot.title = element_text(hjust = 0.5, face = "bold")
   )
 
 cf_lgr_comparison
 
 #ran model twice with energy and loudness separately loaded into the model due to multicolinearity test showing high positive correlation but got the same accuracy of 61.23% value so model stayed same despite moving around these characteristics- nagelkerke value was highest when both characteristics were included in the model however
 
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #showing if there is a significant relationship between musical characteristics (independent variables) to check multicollinearity which could affect the model
 
@@ -1111,19 +1128,23 @@ print(random_forest_confusion_matrix_results_2)
 #random forest 2 worse than random forest 1 since sensitivity moved from 9% to 7%
 
 
-#confusion matrix plot for 1st random forest (best performing)
+#confusion matrix plot for 2nd random forest (best performing)
+
+cm_rf_table <- random_forest_confusion_matrix_results_2$table
+
+cm_rf_long <- as.data.frame(cm_rf_table)
+
+colnames(cm_rf_long) <- c("Predicted", "Actual", "Count")
 
 cm_rf_comparison <- ggplot(cm_rf_long, aes(x = Predicted, y = Actual, fill = Count)) +
   geom_tile(color = "white", lwd = 1) +
   geom_text(aes(label = Count), 
             size = 6, 
             fontface = "bold",
-            color = ifelse(cm_rf_long$Predicted == "0" & cm_rf_long$Actual == "0", 
-                           "black", 
-                           ifelse(cm_rf_long$Count > max(cm_rf_long$Count)/2, "white", "black"))) +
+            color = ifelse(cm_rf_long$Predicted == "1", "white", "black")) +
   scale_fill_viridis_c(option = "magma", direction = 1) + 
   labs(
-    title = "Confusion Matrix: Random Forest 1",
+    title = "Confusion Matrix: Random Forest 2",
     x = "Predicted",
     y = "Actual",
     fill = "Frequency"
@@ -1135,7 +1156,7 @@ cm_rf_comparison <- ggplot(cm_rf_long, aes(x = Predicted, y = Actual, fill = Cou
     plot.title = element_text(hjust = 0.5, face = "bold")
   )
 
-print(cm_rf_comparison)
+cm_rf_comparison
 
 #finding AUC for random forest 2
 random_forest_probabilities_2 <- predict(random_forest_2, 
@@ -1223,20 +1244,10 @@ legend("bottomright",
        cex = 0.8)
 
 #logistic regression 2 has best predictive power
-#----------------------------------------------------------------------------------------------------
-
-varImpPlot(random_forest_2)
-
-importance(random_forest_2)
-
-#mean decrease accuracy shows the model may perform better if i remove acousticness (-0.23) as a predictor
-#mean decrease gini shows explicitness is usually not helpful in separating popular from non-popular songs (20.09)
-#energy (12.72) and loudness (9.62) are helpful in determining if a song will be non-popular
-#instrumentalness is also somewhat helpful (7.93)- i am including instrumentalness since my previous tests show loudness and energy overlap as predictors
-
 
 #ran model with only energy or loudness and the accuracy was higher when both were included in the model
 
+#----------------------------------------------------------------------------------------------------
 
 #viewing which musical characteristics variables are more important when predicting popularity for the best performing RF model
 
@@ -1292,5 +1303,8 @@ install.packages("sjPlot")
 tab_model(logistic_regression_2)
 
 tab_model(stepwise_model)
+
+
+
 
 
