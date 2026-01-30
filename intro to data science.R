@@ -989,9 +989,9 @@ check_linearity <- function(df, feature, target) {
       logit = log(prob_adj)
     ) %>%
     ggplot(aes(x = mean_val, y = logit)) +
-    geom_point(size = 3, color = "darkblue") +
-    geom_line(color = "darkblue", alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed") +
+    geom_point(size = 3, color = "turquoise") +
+    geom_line(color = "turquoise", alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE, color = "orange", linetype = "dashed") +
     labs(title = paste("Linearity Check (Logit):", feature),
          x = paste("Mean", feature), 
          y = "Log-Odds (Logit)") +
@@ -999,6 +999,46 @@ check_linearity <- function(df, feature, target) {
 }
 
 check_linearity (dataset_range, "energy", "is_pop")
+
+check_linearity (dataset_range, "danceability", "is_pop")
+
+check_linearity (dataset_range, "acousticness", "is_pop")
+
+check_linearity (dataset_range, "speechiness", "is_pop")
+
+check_linearity (dataset_range, "tempo", "is_pop")
+
+check_linearity (dataset_range, "valence", "is_pop")
+
+check_linearity (dataset_range, "liveness", "is_pop")
+
+check_linearity (dataset_range, "loudness", "is_pop")
+
+check_linearity (dataset_range, "instrumentalness", "is_pop")
+
+#putting them on same plot for comparability
+
+p1 <- check_linearity(dataset_range, "energy", "is_pop")
+p2 <- check_linearity(dataset_range, "danceability", "is_pop")
+p3 <- check_linearity(dataset_range, "acousticness", "is_pop")
+p4 <- check_linearity(dataset_range, "speechiness", "is_pop")
+p5 <- check_linearity(dataset_range, "tempo", "is_pop")
+p6 <- check_linearity(dataset_range, "valence", "is_pop")
+p7 <- check_linearity(dataset_range, "liveness", "is_pop")
+p8 <- check_linearity(dataset_range, "loudness", "is_pop")
+p9 <- check_linearity(dataset_range, "instrumentalness", "is_pop")
+
+
+linearity_grid <- (p1 + p2 + p3) / 
+  (p4 + p5 + p6) / 
+  (p7 + p8 + p9)
+
+
+linearity_grid + plot_annotation(
+  title = "Linearity Checks for Logistic Regression",
+  subtitle = "Evaluating the Log-Odds relationship for musical features",
+  theme = theme(plot.title = element_text(size = 16, face = "bold"))
+)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
